@@ -7,7 +7,21 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @all_ratings = Movie.getRatingsValues
+    flash[:notice] = "ratings values are " + @all_ratings.to_s
+    sort_by = params[:sort_by]
+#flash[:notice] = ":head_class is " + params[:head_class]
+    if sort_by == 'title'
+      @title_head_style = params[:head_class]
+      @rel_date_head_style = ""
+    elsif sort_by == 'release_date'
+      @title_head_style = ""
+      @rel_date_head_style = params[:head_class]
+    else
+      @title_head_style = ""
+      @rel_date_head_style = ""
+    end
+    @movies = Movie.order("#{params[:sort_by]}").all
   end
 
   def new
