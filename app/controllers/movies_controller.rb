@@ -6,58 +6,56 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-  def index_old
-    @all_ratings = Movie.getRatingsValues
-    @selected_ratings = @all_ratings
-
-
-    if params[:ratings] != nil
-      @selected_ratings = params[:ratings].keys
-      logger.debug("Selected ratings are #{@selected_ratings.to_s}")
-    end
-
-    @checked_state = Hash.new(false)    
-    @selected_ratings.each do |elem| 
-      logger.debug("elem is #{elem.to_s}")
-      @checked_state[elem]=true 
-    end
-    logger.debug("@checked_state is #{@checked_state.to_s}")
-
-    sort_by = params[:sort_by]
-    if sort_by == 'title'
-      @title_head_style = params[:head_class]
-      @rel_date_head_style = ""
-    elsif sort_by == 'release_date'
-      @title_head_style = ""
-      @rel_date_head_style = params[:head_class]
-    else
-      @title_head_style = ""
-      @rel_date_head_style = ""
-    end
-
-    @movies = Movie.where({:rating=>@selected_ratings}).order("#{params[:sort_by]}").all
-  end
-
   def index
     
     @all_ratings = Movie.getRatingsValues
     @selected_ratings = {}
-    if params[:ratings] == nil
-      if @selected_ratings.empty?
-        if session[:selected_ratings]
-          @selected_ratings = session[:selected_ratings]
-          params[:ratings] = session[:selected_ratings]
-          logger.debug("session params exist, so redirecting to #{movies_path params}")
-          redirect_to movies_path params
-        else
-          @all_ratings.each { |e| @selected_ratings[e] = "on"}
-        end
-      end
-    else
+    @require_redirect = false
+    #setup params if not set.
+    if params[:ratings] 
       @selected_ratings = params[:ratings]
+      session[:selected_ratings] = params[:ratings]
+    else
+      #no ratings passed in - do we have any cached?
+      if session[:selected_ratings]
+        # Yes we do - set params to the cached versions ready
+        # for a redirect
+        params[:ratings] = session[:selected_ratings]
+        logger.debug("session params exist, so redirecting to #{movies_path params}")
+        requre_redirect = true
+      else
+        # Likely to be first time loaded. No session or passed in
+        # ratings sorting values. Set all availiable ratings to on.
+        # ready for redirect
+       
+        @all_ratings.each { |e| @selected_ratings[e] = "on"}
+        params[:ratings] = @selected_ratings
+        require_redirect = true
+      end
     end
+
     logger.debug("selected_ratings is #{@selected_ratings}")
-    session[:selected_ratings]=@selected_ratings
+
+
+    if params[:sort_by]
+      #set cached sorting criteria
+      session[:sort_by] = params[:sort_by]
+    elsif
+      # No sorting creteria passed in. Are there cached criteria?
+      if session[:sort_by]
+        params[:sort_by] = session[:sort_by]
+        require_redirect = true
+      else
+        # no sorting prams passed in, or cached. Need to set to default values
+        params[:sort_by]='title'
+        require_redirect = true
+      end
+    end
+
+    if require_redirect 
+      redirect_to movies_path params
+    end 
+
 
     sort_by = params[:sort_by]
     if sort_by == 'title'
