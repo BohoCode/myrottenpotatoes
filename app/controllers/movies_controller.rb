@@ -46,6 +46,9 @@ class MoviesController < ApplicationController
       if @selected_ratings.empty?
         if session[:selected_ratings]
           @selected_ratings = session[:selected_ratings]
+          params[:ratings] = session[:selected_ratings]
+          logger.debug("session params exist, so redirecting to #{movies_path params}")
+          redirect_to movies_path params
         else
           @all_ratings.each { |e| @selected_ratings[e] = "on"}
         end
