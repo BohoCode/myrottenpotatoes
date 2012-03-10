@@ -8,9 +8,22 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.getRatingsValues
-    flash[:notice] = "ratings values are " + @all_ratings.to_s
+    @selected_ratings = @all_ratings
+
+
+    if params[:ratings] != nil
+      @selected_ratings = params[:ratings].keys
+      logger.debug("Selected ratings are #{@selected_ratings.to_s}")
+    end
+
+    @checked_state = Hash.new(false)    
+    @selected_ratings.each do |elem| 
+      logger.debug("elem is #{elem.to_s}")
+      @checked_state[elem]=true 
+    end
+    logger.debug("@checked_state is #{@checked_state.to_s}")
+
     sort_by = params[:sort_by]
-#flash[:notice] = ":head_class is " + params[:head_class]
     if sort_by == 'title'
       @title_head_style = params[:head_class]
       @rel_date_head_style = ""
@@ -21,7 +34,8 @@ class MoviesController < ApplicationController
       @title_head_style = ""
       @rel_date_head_style = ""
     end
-    @movies = Movie.order("#{params[:sort_by]}").all
+
+    @movies = Movie.where({:rating=>@selected_ratings}).order("#{params[:sort_by]}").all
   end
 
   def new
