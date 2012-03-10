@@ -9,7 +9,7 @@
   = submit_tag 'Refresh', :id=>"ratings_submit" 
 
 %table#movies
-  %theaa
+  %thead
     %tr
       %th{:class=>"#{@title_head_style}"}= link_to("Movie Title", |
           movies_path({'sort_by'=>:title, 'head_class'=>:hilite, 'ratings'=>@selected_ratings}), |
