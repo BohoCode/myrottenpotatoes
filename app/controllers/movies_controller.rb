@@ -44,12 +44,17 @@ class MoviesController < ApplicationController
     @selected_ratings = {}
     if params[:ratings] == nil
       if @selected_ratings.empty?
-        @all_ratings.each { |e| @selected_ratings[e] = "on"}
+        if session[:selected_ratings]
+          @selected_ratings = session[:selected_ratings]
+        else
+          @all_ratings.each { |e| @selected_ratings[e] = "on"}
+        end
       end
     else
       @selected_ratings = params[:ratings]
     end
     logger.debug("selected_ratings is #{@selected_ratings}")
+    session[:selected_ratings]=@selected_ratings
 
     sort_by = params[:sort_by]
     if sort_by == 'title'
