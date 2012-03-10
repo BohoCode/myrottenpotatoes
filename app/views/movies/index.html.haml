@@ -5,17 +5,19 @@
   Include: 
   - @all_ratings.each do |rating|
     = rating
-    = check_box_tag "ratings[#{rating}]", nil, @checked_state[rating] 
+    = check_box_tag "ratings[#{rating}]", nil, @selected_ratings[rating]=="on" 
   = submit_tag 'Refresh', :id=>"ratings_submit" 
 
 %table#movies
   %theaa
     %tr
       %th{:class=>"#{@title_head_style}"}= link_to("Movie Title", |
-        movies_path({'sort_by'=>:title, 'head_class'=>:hilite, 'ratings'=>@selected_ratings}), |
-        :id => "title_header")
+          movies_path({'sort_by'=>:title, 'head_class'=>:hilite, 'ratings'=>@selected_ratings}), |
+          :id => "title_header")
       %th Rating
-      %th{:class=>"#{@rel_date_head_style}"}= link_to "Release Date", movies_path({'sort_by'=>:release_date, 'head_class'=>:hilite}), :id => "release_date_header"
+      %th{:class=>"#{@rel_date_head_style}"}= link_to("Release Date", |
+          movies_path({'sort_by'=>:release_date, 'head_class'=>:hilite, 'ratings'=>@selected_ratings}), |
+          :id => "release_date_header")
       %th More Info
   %tbody
     - @movies.each do |movie|

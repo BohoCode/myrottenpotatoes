@@ -6,7 +6,7 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-  def index
+  def index_old
     @all_ratings = Movie.getRatingsValues
     @selected_ratings = @all_ratings
 
@@ -38,6 +38,39 @@ class MoviesController < ApplicationController
     @movies = Movie.where({:rating=>@selected_ratings}).order("#{params[:sort_by]}").all
   end
 
+  def index
+    
+    @all_ratings = Movie.getRatingsValues
+    @selected_ratings = {}
+    if params[:ratings] == nil
+      if @selected_ratings.empty?
+        @all_ratings.each { |e| @selected_ratings[e] = "on"}
+      end
+    else
+      @selected_ratings = params[:ratings]
+    end
+    logger.debug("selected_ratings is #{@selected_ratings}")
+
+    sort_by = params[:sort_by]
+    if sort_by == 'title'
+      @title_head_style = params[:head_class]
+      @rel_date_head_style = ""
+    elsif sort_by == 'release_date'
+      @title_head_style = ""
+      @rel_date_head_style = params[:head_class]
+    else
+      @title_head_style = ""
+      @rel_date_head_style = ""
+    end
+    select_criteria = @selected_ratings.select { |k, v| v=="on" }.keys
+    logger.debug("select_criteria is #{select_criteria}")
+    @movies = Movie.where({:rating=>select_criteria})
+                  .order("#{params[:sort_by]}").all
+    
+  end 
+
+
+  
   def new
     # default: render 'new' template
   end
